@@ -32,6 +32,9 @@ import GHC.Generics
 import Data.Aeson
 import Data.List (nub)
 import Data.Text.Encoding
+import Data.Time.Calendar
+import Data.Time.Clock
+
 instance MonadHttp IO where
   handleHttpException = throwIO
 
@@ -54,11 +57,20 @@ makeDetailsPage = do
   topTableDetails <- getDetails "com.blueimpact.mof"
   -- pPrintNoColor details
 
-  -- h3 $ text "Androidトップ無料ゲームランキング【1〜20位まで一挙公開！】"
+  curTime <- getCurrentTime
 
-  let doc = mconcat $ topDoc : (map getTable $ zip [1..] $ catMaybes details)
+  let doc = mconcat $ header : header2 : topDoc :
+              (map getTable $ zip [1..] $ catMaybes details)
       topDoc = maybe (div $ text "") identity $ (getTopTable <$> topTableDetails)
       docString = Text.Blaze.Html.Renderer.Pretty.renderHtml doc
+      header = h3 $ text "Androidトップ無料ゲームランキング【1〜20位まで一挙公開！】"
+      header2 = preEscapedToHtml $ "[aside type=\"normal\"]\
+          \<strong>ランキング調査方法</strong><br>\
+          \参考：GooglePlayトップ無料ゲームTOP20<br>"   <> date <> "[/aside]"
+
+      (y,m,d) = toGregorian $ utctDay curTime
+      date = show y <> "年" <> show m <> "月" <> show d <> "日調べ" :: Text
+
   return $ Data.Text.Lazy.Encoding.encodeUtf8 $ pShow docString
 
 getTable (rank,(AppDetails appN appD appI appDev appRev appDC appRC)) = do
