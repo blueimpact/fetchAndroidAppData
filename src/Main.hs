@@ -62,7 +62,7 @@ makeDetailsPage = do
   let doc = mconcat $ header : header2 : topDoc :
               (map getTable $ zip [1..] $ catMaybes details)
       topDoc = maybe (div $ text "") identity $ (getTopTable <$> topTableDetails)
-      docString = Text.Blaze.Html.Renderer.Pretty.renderHtml doc
+      docString = Text.Blaze.Html.Renderer.Text.renderHtml doc
       header = h3 $ text "Androidトップ無料ゲームランキング【1〜20位まで一挙公開！】"
       header2 = preEscapedToHtml $ "[aside type=\"normal\"]\
           \<strong>ランキング調査方法</strong><br>\
@@ -71,7 +71,7 @@ makeDetailsPage = do
       (y,m,d) = toGregorian $ utctDay curTime
       date = show y <> "年" <> show m <> "月" <> show d <> "日調べ" :: Text
 
-  return $ Data.Text.Lazy.Encoding.encodeUtf8 $ pShow docString
+  return $ Data.Text.Lazy.Encoding.encodeUtf8 $ docString
 
 getTable (rank,(AppDetails appN appD appI appDev appRev appDC appRC)) = do
   table $ tbody $ do
@@ -88,7 +88,7 @@ getTable (rank,(AppDetails appN appD appI appDev appRev appDC appRC)) = do
         ul ! class_ "grank" $ do
           li $ text $ "開発者：" <> appDev
           li $ text $ "レビュー評価：" <> appRev
-          li $ text $ "レビュー数：" <> appRC
+          li $ text $ "レビュー数：" <> appRC <> "件"
           li $ text $ "ダウンロード数：" <> appDC
           li $ text $ "前回順位：" <> show rank <> "位"
 
@@ -109,7 +109,7 @@ getTopTable (AppDetails appN appD appI appDev appRev appDC appRC) = do
         ul ! class_ "grank" $ do
           li $ text $ "開発者：" <> appDev
           li $ text $ "レビュー評価：" <> appRev
-          li $ text $ "レビュー数：" <> appRC
+          li $ text $ "レビュー数：" <> appRC <> "件"
           li $ text $ "ダウンロード数：" <> appDC
 
 rankLink :: Int -> Text
