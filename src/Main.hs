@@ -5,7 +5,7 @@
 
 module Main where
 
-import Protolude
+import Protolude hiding (div)
 import Network.HTTP.Req
 import Text.HTML.TagSoup
 import Text.HTML.TagSoup.Tree
@@ -41,7 +41,7 @@ main = do
   let app req respond = do
         bs <- makeDetailsPage
         let header = [(hContentType, "text/plain"), ("charset", "utf-8")
-                     , ("content-disposition", "attachement")]
+                     , ("content-disposition", "attachement; filename = \"androidAppData.txt\"")]
         respond $ responseLBS ok200 header bs
   runEnv 8080 app
 
@@ -51,11 +51,13 @@ makeDetailsPage = do
   apps <- getTopApps
   -- pPrintNoColor apps
   details <- mapM getDetails apps
+  topTableDetails <- getDetails "com.blueimpact.mof"
   -- pPrintNoColor details
 
   -- h3 $ text "Androidトップ無料ゲームランキング【1〜20位まで一挙公開！】"
 
-  let doc = mconcat $ map getTable $ zip [1..] $ catMaybes details
+  let doc = mconcat $ topDoc : (map getTable $ zip [1..] $ catMaybes details)
+      topDoc = maybe (div $ text "") identity $ (getTopTable <$> topTableDetails)
       docString = Text.Blaze.Html.Renderer.Pretty.renderHtml doc
   return $ Data.Text.Lazy.Encoding.encodeUtf8 $ pShow docString
 
@@ -77,6 +79,26 @@ getTable (rank,(AppDetails appN appD appI appDev appRev appDC appRC)) = do
           li $ text $ "レビュー数：" <> appRC
           li $ text $ "ダウンロード数：" <> appDC
           li $ text $ "前回順位：" <> show rank <> "位"
+
+
+getTopTable (AppDetails appN appD appI appDev appRev appDC appRC) = do
+  table $ tbody $ do
+    tr $ td ! class_ "granktitle" ! colspan "2" $ do
+      img ! src "http://www.app510.net/int/wp-content/uploads/rank-pr.png"
+        ! alt "rank-pr"
+        ! width "40" ! height "40"
+      a ! href (toValue appD) ! (customAttribute "target" "_blank") $ text appN
+    tr $ do
+      td ! class_ "grank" $ do
+        a ! href (toValue appD) ! (customAttribute "target" "_blank") $ do
+          img ! class_ "aligncenter" !
+            src (toValue appI) ! alt "g-rank" ! width "100" ! height "100"
+      td ! class_ "grank" $ do
+        ul ! class_ "grank" $ do
+          li $ text $ "開発者：" <> appDev
+          li $ text $ "レビュー評価：" <> appRev
+          li $ text $ "レビュー数：" <> appRC
+          li $ text $ "ダウンロード数：" <> appDC
 
 rankLink :: Int -> Text
 rankLink r = "http://www.app510.net/int/wp-content/uploads/rank-i" <> val <> ".png"
