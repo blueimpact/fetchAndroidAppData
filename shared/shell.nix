@@ -1,5 +1,5 @@
 { nixpkgs ? import <nixpkgs> {}
-, reflex-platform ? import ../reflex-platform {}
+, reflex-platform ? import ../../reflex-platform {}
 , ghc ? reflex-platform.ghc }:
 
 let

@@ -17,8 +17,29 @@ cabal-version:       >=1.10
 
 executable fetchappdata-frontend
   main-is:             Main.hs
-  -- other-modules:       
+  -- other-modules:       Widgets
   -- other-extensions:    
+  default-extensions:
+                OverloadedStrings
+                MultiParamTypeClasses
+                TypeFamilies
+                GADTs
+                GeneralizedNewtypeDeriving
+                FlexibleContexts
+                FlexibleInstances
+                EmptyDataDecls
+                NoMonomorphismRestriction
+                DeriveDataTypeable
+                ViewPatterns
+                TupleSections
+                RecordWildCards
+                CPP
+                NoImplicitPrelude
+                RecursiveDo
+                ScopedTypeVariables
+                PartialTypeSignatures
+                ConstraintKinds
+
   build-depends:       base >=4.9 && <4.10
                      , reflex-websocket-interface-shared
                      , reflex-websocket-interface
@@ -30,6 +51,11 @@ executable fetchappdata-frontend
                      , time
                      , aeson
                      , pretty-simple
+                     , reflex-material-bootstrap
+                     , protolude
+                     , lens
+                     , fetchappdata-shared
+
 
 
   hs-source-dirs:      src

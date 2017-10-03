@@ -17,7 +17,10 @@ cabal-version:       >=1.10
 
 executable fetchappdata
   main-is:             Main.hs
-  -- other-modules:       
+  other-modules:       Handler
+                     , DB
+                     , MakeHtml
+
   -- other-extensions:    
   build-depends:       base >=4.9 && <4.10
                      , pretty-simple
@@ -30,9 +33,40 @@ executable fetchappdata
                      , protolude
                      , http-types
                      , wai
+                     , network
+                     , wai-websockets
                      , bytestring
                      , time
                      , reflex-websocket-interface-shared
                      , reflex-websocket-interface-server
+                     , tiny-scheduler
+                     , haskey
+                     , haskey-mtl
+                     , haskey-btree
+                     , fetchappdata-shared
+                     , websockets
+                     , lens
+                     , binary
+                     , binary-orphans
+
+  default-extensions:
+                DeriveGeneric
+                OverloadedStrings
+                MultiParamTypeClasses
+                TypeFamilies
+                GADTs
+                GeneralizedNewtypeDeriving
+                FlexibleContexts
+                FlexibleInstances
+                EmptyDataDecls
+                NoMonomorphismRestriction
+                DeriveDataTypeable
+                ViewPatterns
+                TupleSections
+                RecordWildCards
+                NoImplicitPrelude
+                ScopedTypeVariables
+                PartialTypeSignatures
+                ConstraintKinds
   hs-source-dirs:      src
   default-language:    Haskell2010

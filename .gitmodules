@@ -4,3 +4,15 @@
 [submodule "reflex-websocket-interface"]
 	path = reflex-websocket-interface
 	url = git@github.com:dfordivam/reflex-websocket-interface.git
+[submodule "reflex-material-bootstrap"]
+	path = reflex-material-bootstrap
+	url = https://github.com/hexresearch/reflex-material-bootstrap.git
+[submodule "haskey-mtl"]
+	path = haskey-mtl
+	url = https://github.com/haskell-haskey/haskey-mtl.git
+[submodule "haskey"]
+	path = haskey
+	url = https://github.com/haskell-haskey/haskey.git
+[submodule "haskey-btree"]
+	path = haskey-btree
+	url = https://github.com/haskell-haskey/haskey-btree.git
