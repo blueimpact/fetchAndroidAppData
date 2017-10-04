@@ -10,7 +10,7 @@ import Control.Monad.Haskey
 import Control.Monad.IO.Class (MonadIO, liftIO)
 
 import Data.BTree.Alloc (AllocM, AllocReaderM)
-import Data.BTree.Impure (Tree, insertTree, lookupTree, toList)
+import Data.BTree.Impure (Tree, insertTree, lookupTree, toList, foldrWithKey)
 import Data.BTree.Primitives (Value, Key)
 import Data.Binary (Binary)
 import Data.Foldable (foldlM)
@@ -24,7 +24,6 @@ import Database.Haskey.Alloc.Concurrent (Root)
 import GHC.Generics (Generic)
 import Data.Binary.Orphans
 
-type RankingList = [(Rank,AppDetails)]
 type RankingTree = Tree RankingListId RankingList
 
 data SchemaTable = JP | EN
@@ -78,9 +77,21 @@ queryAllRankingsLists tbl root =
               JP -> schemaJpRankings
               EN -> schemaEnRankings
 
+queryPagedRankingsLists :: AllocReaderM n
+  => SchemaTable
+  -> (Int,Int)
+  -> Schema
+  -> n [(RankingListId, RankingList)]
+queryPagedRankingsLists tbl (start, count) root =
+  take count <$> (drop start <$> foldrWithKey foldFun [] (root ^. f))
+  where f = case tbl of
+              JP -> schemaJpRankings
+              EN -> schemaEnRankings
+        foldFun k a bs = bs ++ [(k,a)]
+
 -- | Query a list
 queryList :: AllocReaderM n
-  =>SchemaTable
+  => SchemaTable
   -> RankingListId
   -> Schema
   -> n (Maybe RankingList)
@@ -89,3 +100,13 @@ queryList tbl k root =
   where f = case tbl of
               JP -> schemaJpRankings
               EN -> schemaEnRankings
+
+openDB :: IO (ConcurrentDb Schema)
+openDB = do
+  let
+    fp = "fetchappdetails.db"
+    hnds = concurrentHandles fp
+  flip runFileStoreT defFileStoreConfig $
+      openConcurrentDb hnds >>= \x -> case x of
+          Nothing -> createConcurrentDb hnds emptySchema
+          Just db -> return db

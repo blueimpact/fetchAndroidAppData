@@ -14,11 +14,11 @@ type AppRequest =
   :<|> GetHtmlForRankingList
 
 -- Messages
-data GetListOfRankings = GetListOfRankings
+data GetListOfRankings = GetListOfRankings Word
   deriving (Show, Generic, FromJSON, ToJSON)
 
 instance WebSocketMessage AppRequest GetListOfRankings where
-  type ResponseT AppRequest GetListOfRankings = [RankingListId]
+  type ResponseT AppRequest GetListOfRankings = ([RankingListId], Word)
 
 
 data GetDetailsForRankingList = GetDetailsForRankingList RankingListId
@@ -26,7 +26,7 @@ data GetDetailsForRankingList = GetDetailsForRankingList RankingListId
 
 instance WebSocketMessage AppRequest GetDetailsForRankingList where
   type ResponseT AppRequest GetDetailsForRankingList
-    = [(Rank, AppDetails)]
+    = Maybe RankingList
 
 
 data GetHtmlForRankingList = GetHtmlForRankingList RankingListId
@@ -36,6 +36,7 @@ instance WebSocketMessage AppRequest GetHtmlForRankingList where
   type ResponseT AppRequest GetHtmlForRankingList = Maybe Text
 
 -- Data Types
+type RankingList = [(Rank,AppDetails)]
 newtype RankingListId = RankingListId UTCTime
   deriving (Show, Eq, Ord, Generic, FromJSON, ToJSON)
 

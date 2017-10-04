@@ -55,6 +55,7 @@ executable fetchappdata-frontend
                      , protolude
                      , lens
                      , fetchappdata-shared
+                     , containers
 
 
 

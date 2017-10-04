@@ -1,6 +1,7 @@
 module MakeHtml where
 
 import Message
+import GetAppDetails
 import Protolude hiding (div)
 import Text.Pretty.Simple (pPrintNoColor, pShow)
 import Text.Blaze.Html4.Strict hiding (map)
@@ -22,15 +23,9 @@ import Data.Time.Calendar
 import Data.Time.Clock
 
 -- makeDetailsPage :: IO ByteString
-makeDetailsPage = do
-  apps <- getTopApps
-  -- pPrintNoColor apps
-  details <- mapM getDetails apps
-  topTableDetails <- getDetails "com.blueimpact.mof"
-  -- pPrintNoColor details
+makeDetailsPage details curTime topTableDetails = do
 
-  curTime <- getCurrentTime
-
+  -- topTableDetails <- getDetails "com.blueimpact.mof"
   let doc = mconcat $ header : header2 : topDoc :
               (map getTable $ zip [1..] $ catMaybes details)
       topDoc = maybe (div $ text "") identity $ (getTopTable <$> topTableDetails)
