@@ -33,22 +33,21 @@ type FetchDetailsM = ExceptT GetAppDataError IO
 instance MonadHttp FetchDetailsM where
   handleHttpException e = throwError $ CannotFetchDetailPage e
 
-fetchDataJP :: ConcurrentDb Schema -> HaskeyT Schema IO ()
-fetchDataJP db = do
+fetchDataJP :: ConcurrentDb Schema -> FileStoreConfig -> IO ()
+fetchDataJP db conf = do
   -- pPrintNoColor apps
-  details <- lift $ do
-    runExceptT $ do
-      apps <- getTopApps
-      mapM getDetails apps
+  details <- runExceptT $ do
+    apps <- getTopApps
+    mapM getDetails apps
 
-  curTime <- lift $ getCurrentTime
+  curTime <- getCurrentTime
   case details of
-    (Left e) -> lift $ putStrLn $ "Error in FetchData:(" <> show curTime <> ")" <> (show e :: Text)
+    (Left e) -> putStrLn $ "Error in FetchData:(" <> show curTime <> ")" <> (show e :: Text)
     (Right d) -> do
       let appList = zip (map Rank [1..]) d
-      transact_ $ \schema ->
+      runHaskeyT (transact_ $ \schema ->
         insertRankingData JP curTime appList schema
-          >>= commit_
+          >>= commit_) db conf
   -- pPrintNoColor details
 
 
