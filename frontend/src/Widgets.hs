@@ -112,6 +112,13 @@ appHtmlPage rankListId = do
   let showDate d = elAttr "h1" ("style" =: "text-align: center;") d
 
   widgetHold (return()) $ showDate <$> (renderRankinkListId <$> rankListId)
-  void $ textArea $ def &
-    setValue .~ (fmapMaybe identity htmlText) &
-    textAreaConfig_attributes .~ (constDyn $ "style" =: "height: 800px; width: 1200px;")
+  rec
+    let setEv = leftmost [fmapMaybe identity htmlText
+                         , remWhiteSpace <$> tagDyn (value ta) ev ]
+        remWhiteSpace t = mconcat (T.lines t)
+    ev <- button "Remove newline"
+    ta <- textArea $ def &
+      setValue .~ setEv &
+      textAreaConfig_attributes .~ (constDyn $ "style" =: "height: 800px; width: 1200px;")
+
+  return ()
