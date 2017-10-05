@@ -7,6 +7,7 @@ import MakeHtml
 import DB
 
 import Protolude hiding (div)
+import Data.Time
 
 import Control.Monad.Haskey
 
@@ -30,4 +31,10 @@ getDetailsForRankingList (GetDetailsForRankingList r) =
 
 getHtmlForRankingList :: GetHtmlForRankingList
   -> HandlerM (Maybe Text)
-getHtmlForRankingList _ = return Nothing
+getHtmlForRankingList (GetHtmlForRankingList r@(RankingListId utcTime)) = do
+  l <- transactReadOnly (queryList JP r)
+  topTableDetails <- liftIO $ runExceptT $ do
+    getDetails "com.blueimpact.mof"
+  let h = makeDetailsPage <$> l <*> pure utcTime
+            <*> (either (const Nothing) Just topTableDetails)
+  return h

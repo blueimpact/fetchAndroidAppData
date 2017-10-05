@@ -23,13 +23,12 @@ import Data.Time.Calendar
 import Data.Time.Clock
 
 -- makeDetailsPage :: IO ByteString
-makeDetailsPage details curTime topTableDetails = do
+makeDetailsPage details curTime topTableDetails =
 
-  -- topTableDetails <- getDetails "com.blueimpact.mof"
   let doc = mconcat $ header : header2 : topDoc :
-              (map getTable $ zip [1..] $ catMaybes details)
-      topDoc = maybe (div $ text "") identity $ (getTopTable <$> topTableDetails)
-      docString = Text.Blaze.Html.Renderer.Text.renderHtml doc
+              (map getTable details)
+      topDoc = getTopTable topTableDetails
+      docString = Text.Blaze.Html.Renderer.Pretty.renderHtml doc
       header = h3 $ text "Androidトップ無料ゲームランキング【1〜20位まで一挙公開！】"
       header2 = preEscapedToHtml $ "[aside type=\"normal\"]\
           \<strong>ランキング調査方法</strong><br>\
@@ -38,9 +37,10 @@ makeDetailsPage details curTime topTableDetails = do
       (y,m,d) = toGregorian $ utctDay curTime
       date = show y <> "年" <> show m <> "月" <> show d <> "日調べ" :: Text
 
-  return $ Data.Text.Lazy.Encoding.encodeUtf8 $ docString
+  in -- $ Data.Text.Lazy.Encoding.encodeUtf8
+    T.pack docString
 
-getTable (rank,(AppDetails appN appD appI appDev appRev appDC appRC)) = do
+getTable (Rank rank,(AppDetails appN appD appI appDev appRev appDC appRC)) = do
   table $ tbody $ do
     tr $ td ! class_ "granktitle" ! colspan "2" $ do
       img ! src (toValue $ rankLink rank) ! alt (toValue $ rankAltVal rank)

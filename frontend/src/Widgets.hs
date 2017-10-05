@@ -10,6 +10,7 @@ import Control.Lens
 import qualified Data.Map as Map
 import Reflex.Dom.WebSocket.Monad
 import Reflex.Dom.WebSocket.Message
+import Data.Time
 
 import Web.Reflex.Bootstrap.Pagination
 import Web.Reflex.Bootstrap.Table
@@ -57,20 +58,19 @@ renderListItem rankListId = do
       $ GetDetailsForRankingList rankListId <$ d
 
     widgetHold (return ())
-      (fetchDetailsAndRender <$> detailsEv)
+      (fetchDetailsAndRender <$> (fmapMaybe identity detailsEv))
 
     return $ rankListId <$ h
 
 renderRankinkListId (RankingListId t) = do
-  text $ show t
+  text $ show $ utctDay t
 
 fetchDetailsAndRender
   :: AppMonad t m
   => [(Rank, AppDetails)]
   -> AppMonadT t m ()
 fetchDetailsAndRender ls = do
-  -- Show/Hide controls
-  elClass "div" "" $ do
+  elAttr "div" ("style" =: "overflow: auto; height: 400px;") $ do
     mapM_ renderAppDetails ls
 
 renderAppDetails
@@ -109,5 +109,9 @@ appHtmlPage
 appHtmlPage rankListId = do
   htmlText <- getWebSocketResponse $ GetHtmlForRankingList <$> rankListId
 
+  let showDate d = elAttr "h1" ("style" =: "text-align: center;") d
+
+  widgetHold (return()) $ showDate <$> (renderRankinkListId <$> rankListId)
   void $ textArea $ def &
-    setValue .~ (fmapMaybe identity htmlText)
+    setValue .~ (fmapMaybe identity htmlText) &
+    textAreaConfig_attributes .~ (constDyn $ "style" =: "height: 800px; width: 1200px;")
