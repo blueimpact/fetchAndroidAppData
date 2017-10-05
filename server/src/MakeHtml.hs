@@ -40,7 +40,7 @@ makeDetailsPage details curTime topTableDetails =
   in -- $ Data.Text.Lazy.Encoding.encodeUtf8
     T.pack docString
 
-getTable (Rank rank,(AppDetails appN appD appI appDev appRev appDC appRC)) = do
+getTable (lastRank, Rank rank, (AppDetails appN appD appI appDev appRev appDC appRC)) = do
   table $ tbody $ do
     tr $ td ! class_ "granktitle" ! colspan "2" $ do
       img ! src (toValue $ rankLink rank) ! alt (toValue $ rankAltVal rank)
@@ -57,7 +57,10 @@ getTable (Rank rank,(AppDetails appN appD appI appDev appRev appDC appRC)) = do
           li $ text $ "レビュー評価：" <> appRev
           li $ text $ "レビュー数：" <> appRC <> "件"
           li $ text $ "ダウンロード数：" <> appDC
-          li $ text $ "前回順位：" <> show rank <> "位"
+          let showLastRank (Rank rank) =
+                li $ text $ "前回順位：" <> show rank <> "位"
+          mapM_ showLastRank lastRank
+
 
 
 getTopTable (AppDetails appN appD appI appDev appRev appDC appRC) = do

@@ -33,8 +33,21 @@ getHtmlForRankingList :: GetHtmlForRankingList
   -> HandlerM (Maybe Text)
 getHtmlForRankingList (GetHtmlForRankingList r@(RankingListId utcTime)) = do
   l <- transactReadOnly (queryList JP r)
+  ls <- transactReadOnly (queryAllRankingsLists JP)
+  let prevDay = join $ headMay
+        <$> (tailMay $ dropWhile (> r) (reverse $ map fst ls))
+  p <- mapM (\pr -> transactReadOnly (queryList JP pr)) prevDay
   topTableDetails <- liftIO $ runExceptT $ do
     getDetails "com.blueimpact.mof"
-  let h = makeDetailsPage <$> l <*> pure utcTime
+  let h = makeDetailsPage <$> details <*> pure utcTime
             <*> (either (const Nothing) Just topTableDetails)
+      details = map (getPrevDayRankings $ join p) <$> l
   return h
+
+getPrevDayRankings
+  :: Maybe RankingList
+  -> (Rank, AppDetails)
+  -> (Maybe Rank, Rank, AppDetails)
+getPrevDayRankings ps (r,app) = (fst <$> p,r,app)
+  where p = join $ headMay <$>
+          (filter (\(_,x) -> appName x == appName app) <$> ps)
