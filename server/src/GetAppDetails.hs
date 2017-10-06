@@ -36,6 +36,7 @@ instance MonadHttp FetchDetailsM where
 fetchDataJP :: ConcurrentDb Schema -> FileStoreConfig -> IO ()
 fetchDataJP db conf = do
   -- pPrintNoColor apps
+  putStrLn $ ("Doing Fetch Data" :: Text)
   details <- runExceptT $ do
     apps <- getTopApps
     mapM getDetails apps
